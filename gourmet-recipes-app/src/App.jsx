@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Favorites from './pages/Favorites';
 import Header from './components/Header';
 import { AuthProvider } from './context/AuthContext';
+import './App.css';
+
 
 const App = () => {
   return (
@@ -24,3 +26,18 @@ const App = () => {
 };
 
 export default App;
+
+// // App.jsx
+// import React from 'react';
+// import TestAPIs from './components/TestAPI';
+
+// function App() {
+//   return (
+//     <div>
+//       <h1>Application de Test des API</h1>
+//       <TestAPIs />
+//     </div>
+//   );
+// }
+
+// export default App;

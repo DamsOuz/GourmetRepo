@@ -1,8 +1,9 @@
+// Recipe.jsx
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import './Recipe.css';
-
+import { fetchRecipe, fetchRelatedRecipes, addFavorite } from '../api/API'; // Import des fonctions centralisées
+import "./Recipe.css"
 // Fonction utilitaire pour formater les instructions
 function formatInstructions(instr) {
   if (!instr) return [<p key="empty">Aucune instruction disponible.</p>];
@@ -31,83 +32,33 @@ function Recipe() {
   const [related, setRelated] = useState([]);
   const [error, setError] = useState(null);
 
-  // Charger la recette principale
+  // Charger la recette principale via fetchRecipe
   useEffect(() => {
-    fetch(`https://gourmet.cours.quimerch.com/recipes/${id}`, {
-      headers: {
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(`Erreur HTTP ${res.status} : ${txt}`);
-        }
-        const raw = await res.text();
-        try {
-          const data = JSON.parse(raw);
-          setRecipe(data);
-        } catch (err) {
-          console.error("Impossible de parser la recette:", err);
-          setError("Le serveur n’a pas renvoyé de JSON valide pour la recette.");
-        }
-      })
+    fetchRecipe(id)
+      .then((data) => setRecipe(data))
       .catch((err) => {
         console.error("Erreur lors de la récupération de la recette:", err);
         setError(err.message);
       });
   }, [id]);
 
-  // Charger les recettes liées
+  // Charger les recettes liées via fetchRelatedRecipes
   useEffect(() => {
-    fetch(`https://gourmet.cours.quimerch.com/recipes/${id}/related`, {
-      headers: {
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-      .then(async (res) => {
-        if (!res.ok) return; // pas critique si ça échoue
-        const raw = await res.text();
-        try {
-          const data = JSON.parse(raw);
-          setRelated(data);
-        } catch {
-          console.warn("Impossible de parser les recettes liées.");
-        }
-      })
+    fetchRelatedRecipes(id)
+      .then((data) => setRelated(data))
       .catch((err) => {
         console.warn("Erreur lors de la récupération des recettes liées:", err);
       });
   }, [id]);
 
-  // Ajouter aux favoris
+  // Ajouter aux favoris via addFavorite
   const handleAddFavorite = async () => {
     if (!token || !user) {
       alert("Vous devez être connecté pour ajouter aux favoris.");
       return;
     }
     try {
-      const response = await fetch(
-        `https://gourmet.cours.quimerch.com/users/${user.username}/favorites?recipeID=${id}`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const txt = await response.text();
-      if (!response.ok) {
-        if (txt.toLowerCase().includes("déjà")) {
-          throw new Error("Cette recette est déjà dans vos favoris.");
-        } else {
-          throw new Error(`Impossible d’ajouter la recette aux favoris : ${txt}`);
-        }
-      }
+      await addFavorite(user.username, token, id);
       alert("Recette ajoutée aux favoris !");
     } catch (err) {
       console.error("Erreur lors de l’ajout aux favoris:", err);
@@ -129,17 +80,20 @@ function Recipe() {
         <div className="recipe-header">
           <h1>{recipe.name}</h1>
         </div>
-        <img 
-          src={recipe.image_url} 
-          alt={recipe.name} 
+        <img
+          src={recipe.image_url}
+          alt={recipe.name}
           className="recipe-image"
         />
 
         <div className="recipe-meta">
-          <p><strong>Temps :</strong> {recipe.cook_time} min</p>
-          <p><strong>Difficulté :</strong> {recipe.difficulty || "N/A"}</p>
-          <p><strong>Coût :</strong> {recipe.cost || "N/A"}</p>
-          <p><strong>Calories :</strong> {recipe.calories || "N/A"}</p>
+          <p><strong>Temps de préparation :</strong> {recipe.prep_time} min</p>
+          <p><strong>Temps de cuisson :</strong> {recipe.cook_time} min</p>
+          <p><strong>Portions :</strong> {recipe.servings}</p>
+          <p><strong>Coût :</strong> {recipe.cost ?? "N/A"} euros</p>
+          <p><strong>Calories :</strong> {recipe.calories ?? "N/A"} kcal</p>
+          <p><strong>Description :</strong> {recipe.description ?? "N/A"}</p>
+          <p><strong>Date de Création :</strong> {recipe.created_at ?? "N/A"}</p>
         </div>
 
         <div className="recipe-description">
@@ -154,15 +108,15 @@ function Recipe() {
         </button>
       </div>
 
-      {/* Partie droite : related recipes */}
+      {/* Partie droite : recettes liées */}
       <div className="recipe-sidebar">
         <h3>Recettes liées</h3>
         {related.map((rel) => (
           <div key={rel.id} className="related-recipe">
             <a href={`/recettes/${rel.id}`}>
-              <img 
-                src={rel.image_url} 
-                alt={rel.name} 
+              <img
+                src={rel.image_url}
+                alt={rel.name}
                 className="related-recipe-image"
               />
               <p>{rel.name}</p>

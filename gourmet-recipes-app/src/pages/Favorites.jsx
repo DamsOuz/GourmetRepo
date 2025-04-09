@@ -1,32 +1,22 @@
+// Favorites.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { fetchFavorites, removeFavorite } from '../api/API'; // Import des fonctions centralisées
 
 function Favorites() {
   const { token, user } = useContext(AuthContext);
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fonction pour recharger la liste des favoris
-  const fetchFavorites = async () => {
+  // Fonction pour actualiser la liste des favoris
+  const loadFavorites = async () => {
     if (!token || !user) {
       setError("Vous devez être connecté pour voir vos favoris.");
       return;
     }
     try {
-      const res = await fetch('https://gourmet.cours.quimerch.com/favorites', {
-        headers: {
-          Accept: 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Erreur HTTP ${res.status} : ${txt}`);
-      }
-      const rawData = await res.text();
-      const data = JSON.parse(rawData);
+      const data = await fetchFavorites(token);
       setFavorites(data);
       setError(null);
     } catch (err) {
@@ -36,32 +26,17 @@ function Favorites() {
   };
 
   useEffect(() => {
-    fetchFavorites();
+    loadFavorites();
   }, [token, user]);
 
-  const handleRemoveFavorite = async (recipeId) => {
+  const handleRemoveFavorite = async (recipeID) => {
     if (!token || !user) {
       alert("Vous devez être connecté pour retirer un favori.");
       return;
     }
     try {
-      const res = await fetch(
-        `https://gourmet.cours.quimerch.com/users/${user.username}/favorites?recipeID=${recipeId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const txt = await res.text();
-      if (!res.ok) {
-        throw new Error(`Erreur HTTP ${res.status} : ${txt}`);
-      }
-      await fetchFavorites();
-      
+      await removeFavorite(user.username, token, recipeID);
+      await loadFavorites();
       alert("Favori retiré avec succès.");
     } catch (error) {
       console.error("Erreur lors du retrait du favori:", error);
@@ -82,20 +57,27 @@ function Favorites() {
   return (
     <div style={{ padding: '1rem' }}>
       <h1>Mes Favoris</h1>
-      <ul>
-        {favorites.map((fav) => (
-          <li key={fav.id ?? fav.recipeID}>
-            <Link to={`/recettes/${fav.recipeID}`}>
-              {fav.recipe?.name || "Recette sans titre"}
-            </Link>
-            {" "}
-            <button onClick={() => handleRemoveFavorite(fav.recipeID)}>
-              Retirer
-            </button>
-          </li>
-        ))}
-      </ul>
+      {favorites.length === 0 ? (
+        <p>Aucun favori trouvé.</p>
+      ) : (
+        <div className="recipes-grid">
+          {favorites.map((fav) => (
+            <div key={fav.recipe?.id} className="favorite-item" style={{ display: 'flex', alignItems: 'center' }}>
+              <Link to={`/recettes/${fav.recipe?.id}`} className="recipe-card" style={{ textDecoration: 'none', flex: 1 }}>
+                <img src={fav.recipe?.image_url} alt={fav.recipe?.name} style={{ width: '100%', display: 'block' }} />
+                <div className="recipe-info">
+                  <h2>{fav.recipe?.name || "Recette sans titre"}</h2>
+                </div>
+              </Link>
+              <button onClick={() => handleRemoveFavorite(fav.recipe?.id)} className="remove-btn" style={{ marginLeft: '10px' }}>
+                Retirer
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
+
   );
 }
 

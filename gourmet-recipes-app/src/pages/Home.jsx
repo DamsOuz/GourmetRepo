@@ -1,5 +1,7 @@
+// Home.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchRecipes } from '../api/API'; // Import de la fonction centralisée
 import './Home.css';
 
 function Home() {
@@ -7,26 +9,8 @@ function Home() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('https://gourmet.cours.quimerch.com/recipes', {
-      headers: {
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(`Erreur HTTP ${res.status} : ${txt}`);
-        }
-        const rawData = await res.text();
-        try {
-          const data = JSON.parse(rawData);
-          setRecipes(data);
-        } catch (err) {
-          console.error("Impossible de parser en JSON:", err);
-          setError("Le serveur n’a pas renvoyé de JSON valide.");
-        }
-      })
+    fetchRecipes()
+      .then((data) => setRecipes(data))
       .catch((err) => {
         console.error("Erreur lors de la récupération des recettes:", err);
         setError(err.message);

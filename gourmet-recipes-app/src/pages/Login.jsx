@@ -1,6 +1,8 @@
+// Login.jsx
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { loginUser, fetchUser } from '../api/API';
 
 function Login() {
   const [pseudonym, setPseudonym] = useState('');
@@ -15,49 +17,18 @@ function Login() {
     setFeedback('');
 
     try {
-      // Obtenir le token via POST /login
-      const response = await fetch('https://gourmet.cours.quimerch.com/login', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: pseudonym, password })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur HTTP ${response.status} : ${errorText}`);
-      }
-
-      const data = await response.json(); // On suppose que data = { token: "..." }
+      // Utilisation de la fonction centralisée loginUser
+      const data = await loginUser(pseudonym, password);
       console.log("Réponse login:", data);
 
-      // Récupérer les infos de l'utilisateur via GET /users/{username}
-      // On utilise le pseudonyme que l'utilisateur a saisi
-      const meResponse = await fetch(`https://gourmet.cours.quimerch.com/users/${pseudonym}`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${data.token}`
-        }
-      });
-
-      if (!meResponse.ok) {
-        const errorText = await meResponse.text();
-        throw new Error(`Impossible de récupérer l'utilisateur : ${errorText}`);
-      }
-
-      // On suppose que la réponse ressemble à { "username": "beta", "...": "..." }
-      const userData = await meResponse.json();
+      // Récupération des informations utilisateur avec fetchUser
+      const userData = await fetchUser(pseudonym, data.token);
       console.log("Infos utilisateur:", userData);
 
-      // Stocker le token et les infos dans AuthContext
-      // Dans le Header, tu pourras afficher user.username
+      // Stockage dans le AuthContext
       login(data.token, userData);
 
       setFeedback('Connexion réussie !');
-      // Redirige vers la page d'accueil après 1.5s
       setTimeout(() => {
         navigate('/');
       }, 1500);
