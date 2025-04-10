@@ -1,20 +1,20 @@
 import React from 'react';
+import './SearchBar.css';
 
 const SearchBar = ({ onSearch }) => {
-    const handleChange = (e) => {
-        const query = e.target.value;
-        onSearch(query);
-    };
+  const handleChange = (e) => {
+    onSearch(e.target.value);
+  };
 
-    return (
-        <input
-            type="text"
-            onChange={handleChange}
-            placeholder="Rechercher une recette..."
-            aria-label="Recherche de recette"
-            style={{ padding: '0.5rem', width: '100%', maxWidth: '400px' }}
-        />
-    );
+  return (
+    <input
+      type="text"
+      onChange={handleChange}
+      placeholder="Rechercher une recette..."
+      className="search-bar"
+      aria-label="Recherche de recette"
+    />
+  );
 };
 
 export default SearchBar;

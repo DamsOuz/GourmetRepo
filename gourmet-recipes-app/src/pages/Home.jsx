@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchRecipes } from '../api/API';
 import SearchBar from '../components/SearchBar';
-import Spinner from '../components/Spinner';
 import './Home.css';
 
 function Home() {
@@ -34,18 +33,20 @@ function Home() {
   };
 
   if (error) {
-    return <div style={{ color: 'red' }}>Erreur : {error}</div>;
+    return <div style={{ color: 'red', padding: '1rem' }}>Erreur : {error}</div>;
   }
 
   if (recipes.length === 0) {
-    return <Spinner />;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>;
   }
 
   return (
-    <div className="home-container">
+    <div className="home-wrapper">
       <div className="home-header">
-        <h1>Liste des recettes</h1>
-        <SearchBar onSearch={handleSearch} />
+        <h2 className="home-title">Liste des recettes</h2>
+        <div className="search-controls">
+          <SearchBar onSearch={handleSearch} />
+        </div>
       </div>
       <div className="recipes-grid">
         {filteredRecipes.length === 0 ? (
@@ -55,7 +56,7 @@ function Home() {
             <Link key={recipe.id} to={`/recettes/${recipe.id}`} className="recipe-card">
               <img src={recipe.image_url} alt={recipe.name} />
               <div className="recipe-info">
-                <h2>{recipe.name}</h2>
+                <h3>{recipe.name}</h3>
               </div>
             </Link>
           ))
