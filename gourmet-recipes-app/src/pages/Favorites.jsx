@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { fetchFavorites, removeFavorite } from '../api/API';
+import "./Favorites.css"; // On crée un fichier dédié pour les styles de la page des favoris
 
 function Favorites() {
   const { token, user } = useContext(AuthContext);
@@ -48,36 +49,41 @@ function Favorites() {
     return <div>Vous devez être connecté pour voir vos favoris.</div>;
   }
   if (error) {
-    return <div style={{ color: 'red' }}>{error}</div>;
+    return <div className="error">{error}</div>;
   }
   if (!favorites || favorites.length === 0) {
-    return <div>Aucun favori trouvé.</div>;
+    return (
+      <div className="no-favorites-message">
+        <h2>Toujours pas de favori ?</h2>
+        <p>Allez découvrir toutes nos recettes et ajoutez vos préférées !</p>
+        <Link to="/" className="discover-recipes-link">Découvrir les recettes</Link>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Mes Favoris</h1>
-      {favorites.length === 0 ? (
-        <p>Aucun favori trouvé.</p>
-      ) : (
-        <div className="recipes-grid">
-          {favorites.map((fav) => (
-            <div key={fav.recipe?.id} className="favorite-item" style={{ display: 'flex', alignItems: 'center' }}>
-              <Link to={`/recettes/${fav.recipe?.id}`} className="recipe-card" style={{ textDecoration: 'none', flex: 1 }}>
-                <img src={fav.recipe?.image_url} alt={fav.recipe?.name} style={{ width: '100%', display: 'block' }} />
-                <div className="recipe-info">
-                  <h2>{fav.recipe?.name || "Recette sans titre"}</h2>
-                </div>
-              </Link>
-              <button onClick={() => handleRemoveFavorite(fav.recipe?.id)} className="remove-btn" style={{ marginLeft: '10px' }}>
-                Retirer
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="favorites-container">
+      <h1 className="favorites-title">Mes Favoris</h1>
+      <div className="recipes-grid">
+        {favorites.map((fav) => (
+          <div key={fav.recipe?.id} className="favorite-item">
+            <Link to={`/recettes/${fav.recipe?.id}`} className="recipe-card">
+              <img
+                src={fav.recipe?.image_url}
+                alt={fav.recipe?.name}
+                className="recipe-image"
+              />
+              <div className="recipe-info">
+                <h2>{fav.recipe?.name || "Recette sans titre"}</h2>
+              </div>
+            </Link>
+            <button onClick={() => handleRemoveFavorite(fav.recipe?.id)} className="remove-btn">
+              Retirer
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
-
   );
 }
 
