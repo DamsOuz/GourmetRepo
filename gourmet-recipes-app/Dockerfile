@@ -19,6 +19,9 @@ RUN npm run build
 # Étape 2 : Utiliser Nginx pour servir l'application
 FROM nginx:alpine
 
+# Copier le fichier de configuration Nginx personnalisé
+COPY nginx.conf /etc/nginx/nginx.conf
+
 # Copier les fichiers générés par React dans le dossier de Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
