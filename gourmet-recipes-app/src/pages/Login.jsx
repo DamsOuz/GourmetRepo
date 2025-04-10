@@ -1,6 +1,7 @@
 // Login.jsx
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser, fetchUser } from '../api/API';
 
@@ -28,13 +29,13 @@ function Login() {
       // Stockage dans le AuthContext
       login(data.token, userData);
 
-      setFeedback('Connexion réussie !');
+      toast.success('Connexion réussie !');
       setTimeout(() => {
         navigate('/');
       }, 1500);
     } catch (error) {
       console.error('Erreur de connexion :', error);
-      setFeedback('Identifiants invalides ou erreur de connexion.');
+      toast.error('Identifiants invalides ou erreur de connexion.');
     }
   };
 

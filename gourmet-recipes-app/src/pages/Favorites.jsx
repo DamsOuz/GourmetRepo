@@ -1,8 +1,9 @@
 // Favorites.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { fetchFavorites, removeFavorite } from '../api/API'; // Import des fonctions centralisées
+import { fetchFavorites, removeFavorite } from '../api/API';
 
 function Favorites() {
   const { token, user } = useContext(AuthContext);
@@ -31,16 +32,16 @@ function Favorites() {
 
   const handleRemoveFavorite = async (recipeID) => {
     if (!token || !user) {
-      alert("Vous devez être connecté pour retirer un favori.");
+      toast.warn("Vous devez être connecté pour retirer un favori.");
       return;
     }
     try {
       await removeFavorite(user.username, token, recipeID);
       await loadFavorites();
-      alert("Favori retiré avec succès.");
+      toast.success("Favori retiré avec succès.");
     } catch (error) {
       console.error("Erreur lors du retrait du favori:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

@@ -8,6 +8,8 @@ import Header from './components/Header';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
@@ -20,24 +22,20 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/fav" element={<Favorites />} />
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </BrowserRouter>
     </AuthProvider>
   );
 };
 
 export default App;
-
-// // App.jsx
-// import React from 'react';
-// import TestAPIs from './components/TestAPI';
-
-// function App() {
-//   return (
-//     <div>
-//       <h1>Application de Test des API</h1>
-//       <TestAPIs />
-//     </div>
-//   );
-// }
-
-// export default App;
