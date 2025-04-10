@@ -1,4 +1,3 @@
-// API.js
 const API_BASE_URL = 'https://gourmet.cours.quimerch.com';
 
 /**
