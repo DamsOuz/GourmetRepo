@@ -1,0 +1,15 @@
+.search-bar {
+    padding: 0.6rem 1rem;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1em;
+    transition: border-color 0.3s;
+  }
+  
+  .search-bar:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+  }
+  
