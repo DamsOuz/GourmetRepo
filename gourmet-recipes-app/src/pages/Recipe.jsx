@@ -2,8 +2,9 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { fetchRecipe, fetchRelatedRecipes, fetchFavorites, addFavorite, removeFavorite } from '../api/API';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaClock, FaFire, FaUserFriends, FaEuroSign } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import DOMPurify from 'dompurify'; // Importation de DOMPurify
 import "./Recipe.css";
 
 function Recipe() {
@@ -15,7 +16,6 @@ function Recipe() {
   const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Charger la recette
   useEffect(() => {
     fetchRecipe(id)
       .then((data) => setRecipe(data))
@@ -25,7 +25,6 @@ function Recipe() {
       });
   }, [id]);
 
-  // Charger les recettes liées
   useEffect(() => {
     fetchRelatedRecipes(id)
       .then((data) => setRelated(data))
@@ -34,12 +33,10 @@ function Recipe() {
       });
   }, [id]);
 
-  // Vérifier si la recette est déjà dans les favoris
   useEffect(() => {
     if (token && user) {
       fetchFavorites(token)
         .then((data) => {
-          // On suppose que data est un tableau d'objets contenant chacun un champ "recipe" et "recipe.id"
           const favorited = data.some(
             (fav) => fav.recipe && fav.recipe.id.toString() === id.toString()
           );
@@ -82,27 +79,58 @@ function Recipe() {
   return (
     <div className="recipe-container">
       <div className="recipe-main">
-        <div className="recipe-header">
-          <h1>{recipe.name}</h1>
-          <button
-            onClick={toggleFavorite}
-            className="favorite-btn"
-            aria-label={isFavorite ? "Retirer de vos favoris" : "Ajouter aux favoris"}
-          >
-            {isFavorite ? <FaHeart size={24} color="red" /> : <FaRegHeart size={24} color="red" />}
-          </button>
+        <div className="recipe-details">
+          <div className="recipe-image-left">
+            <img src={recipe.image_url} alt={recipe.name} className="recipe-image" />
+          </div>
+          <div className="recipe-characteristics">
+            <div className="recipe-title-container">
+              <h1>{recipe.name}</h1>
+              <button
+                onClick={toggleFavorite}
+                className="favorite-btn"
+                aria-label={isFavorite ? "Retirer de vos favoris" : "Ajouter aux favoris"}
+              >
+                {isFavorite ? <FaHeart size={24} color="red" /> : <FaRegHeart size={24} color="red" />}
+              </button>
+            </div>
+            {/* Affichage de la description avec DOMPurify pour supprimer les scripts */}
+            <p
+              className="recipe-description"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recipe.description) }}
+            />
+            <ul className="recipe-meta-icons">
+              <li>
+                <FaClock /> <span>Prépa : {recipe.prep_time} min</span>
+              </li>
+              <li>
+                <FaClock /> <span>Cuisson : {recipe.cook_time} min</span>
+              </li>
+              <li>
+                <FaUserFriends /> <span>{recipe.servings} portions</span>
+              </li>
+              <li>
+                <FaEuroSign /> <span>Coût : {recipe.cost ?? "N/A"} euros</span>
+              </li>
+              <li>
+                <FaFire /> <span>Calories : {recipe.calories ?? "N/A"} kcal</span>
+              </li>
+            </ul>
+          </div>
         </div>
-        <img src={recipe.image_url} alt={recipe.name} className="recipe-image" />
-        <div className="recipe-meta">
-          <p><strong>Temps de préparation :</strong> {recipe.prep_time} min</p>
-          <p><strong>Temps de cuisson :</strong> {recipe.cook_time} min</p>
-          <p><strong>Portions :</strong> {recipe.servings}</p>
-          <p><strong>Coût :</strong> {recipe.cost ?? "N/A"} euros</p>
-          <p><strong>Calories :</strong> {recipe.calories ?? "N/A"} kcal</p>
-          <p><strong>Description :</strong> {recipe.description ?? "N/A"}</p>
-          <p><strong>Date de Création :</strong> {recipe.created_at ?? "N/A"}</p>
+
+        <div className="recipe-instructions">
+          <h2>Instructions</h2>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: recipe.instructions
+                ? DOMPurify.sanitize(recipe.instructions)
+                : "Aucune instruction disponible."
+            }}
+          />
         </div>
       </div>
+
       <div className="recipe-sidebar">
         <h3>Recettes liées</h3>
         {related.length === 0 ? (

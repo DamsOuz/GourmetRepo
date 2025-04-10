@@ -9,13 +9,20 @@ function Header() {
   // Détermine quel lien afficher à gauche en fonction de la route actuelle
   let leftLink = null;
   if (location.pathname === '/fav') {
-    // Sur la page Favoris, afficher uniquement le bouton Accueil
+    // Sur la page Favoris, afficher uniquement le bouton Liste des recettes
     leftLink = <Link to="/">Liste des recettes</Link>;
   } else if (location.pathname === '/') {
     // Sur la page Accueil, afficher uniquement le bouton Favoris
     leftLink = <Link to="/fav">Favoris</Link>;
   } else {
-    leftLink = <Link to="/">Liste des recettes</Link>;
+    // Sur les autres pages, afficher les deux liens : Favoris et Liste des recettes
+    leftLink = (
+      <>
+        <Link to="/">Liste des recettes</Link>
+        <span> | </span>
+        <Link to="/fav">Favoris</Link>
+      </>
+    );
   }
 
   return (
