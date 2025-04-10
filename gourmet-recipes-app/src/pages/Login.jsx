@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser, fetchUser } from '../api/API';
+import './Login.css'; // Import du fichier de style
 
 function Login() {
   const [pseudonym, setPseudonym] = useState('');
@@ -16,23 +17,16 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback('');
-
     try {
-      // Utilisation de la fonction centralisée loginUser
       const data = await loginUser(pseudonym, password);
       console.log("Réponse login:", data);
-
-      // Récupération des informations utilisateur avec fetchUser
       const userData = await fetchUser(pseudonym, data.token);
       console.log("Infos utilisateur:", userData);
-
-      // Stockage dans le AuthContext
       login(data.token, userData);
-
       toast.success('Connexion réussie !');
       setTimeout(() => {
         navigate('/');
-      }, 1500);
+      }, 750);
     } catch (error) {
       console.error('Erreur de connexion :', error);
       toast.error('Identifiants invalides ou erreur de connexion.');
@@ -40,9 +34,9 @@ function Login() {
   };
 
   return (
-    <div>
+    <div className="login-container">
       <h1>Connexion</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="login-form">
         <div>
           <label>Pseudonyme :</label>
           <input
