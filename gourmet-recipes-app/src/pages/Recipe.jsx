@@ -16,6 +16,13 @@ function Recipe() {
   const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
+
+  const extractSteps = (instructions) => {
+    const cleaned = instructions.replace(/\n+/g, ' ').trim();
+    const steps = cleaned.split(/(?:\d+\.\s+|-+\s+)/).filter(step => step.trim() !== '');
+    return steps;
+  };
+
   useEffect(() => {
     fetchRecipe(id)
       .then((data) => setRecipe(data))
@@ -76,6 +83,8 @@ function Recipe() {
     return <div>Chargement...</div>;
   }
 
+  const steps = recipe.instructions ? extractSteps(recipe.instructions) : [];
+
   return (
     <div className="recipe-container">
       <div className="recipe-main">
@@ -94,7 +103,6 @@ function Recipe() {
                 {isFavorite ? <FaHeart size={24} color="red" /> : <FaRegHeart size={24} color="red" />}
               </button>
             </div>
-            {/* Affichage de la description avec DOMPurify pour supprimer les scripts */}
             <p
               className="recipe-description"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recipe.description) }}
@@ -121,13 +129,13 @@ function Recipe() {
 
         <div className="recipe-instructions">
           <h2>Instructions</h2>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: recipe.instructions
-                ? DOMPurify.sanitize(recipe.instructions)
-                : "Aucune instruction disponible."
-            }}
-          />
+          {steps.length > 0 ? (
+            steps.map((step, index) => (
+              <p key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(step) }} />
+            ))
+          ) : (
+            <p>Aucune instruction disponible.</p>
+          )}
         </div>
       </div>
 
