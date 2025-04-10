@@ -6,10 +6,10 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Au montage, on relit le token et l'utilisateur depuis le localStorage
+  // Au montage, on relit le token et l'utilisateur depuis le sessionStorage
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const storedToken = sessionStorage.getItem("token");
+    const storedUser = sessionStorage.getItem("user");
 
     // Vérifie que storedToken n'est pas "undefined" avant de l'utiliser
     if (storedToken && storedToken !== "undefined") {
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
       } catch (err) {
-        console.error("Erreur de parsing du user dans localStorage :", err);
+        console.error("Erreur de parsing du user dans sessionStorage :", err);
       }
     }
   }, []);
@@ -33,16 +33,16 @@ export const AuthProvider = ({ children }) => {
     setToken(newToken);
     setUser(userData);
 
-    localStorage.setItem("token", newToken || "");
-    localStorage.setItem("user", userData ? JSON.stringify(userData) : "");
+    sessionStorage.setItem("token", newToken || "");
+    sessionStorage.setItem("user", userData ? JSON.stringify(userData) : "");
   };
 
   // logout efface tout
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
   };
 
   return (
