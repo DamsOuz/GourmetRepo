@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // La fonction login reçoit un token "propre" (sans "Bearer ")
+  // La fonction login reçoit un token sans bearer
   // et un objet userData, puis les stocke
   const login = (newToken, userData) => {
     setToken(newToken);

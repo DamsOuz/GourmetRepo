@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { fetchRecipe, fetchRelatedRecipes, fetchFavorites, addFavorite, removeFavorite } from '../api/API';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import Spinner from '../components/Spinner';
 import "./Recipe.css";
 
 // Fonction utilitaire pour formater les instructions
@@ -93,8 +94,9 @@ function Recipe() {
   if (error) {
     return <div className="error" style={{ color: 'red' }}>{error}</div>;
   }
+
   if (!recipe) {
-    return <div>Chargement...</div>;
+    return <Spinner />;
   }
 
   return (
@@ -102,9 +104,15 @@ function Recipe() {
       <div className="recipe-main">
         <div className="recipe-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1>{recipe.name}</h1>
-          <button onClick={toggleFavorite} className="favorite-btn" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button
+            onClick={toggleFavorite}
+            className="favorite-btn"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            aria-label={isFavorite ? 'Retirer de vos favoris' : 'Ajouter aux favoris'}
+          >
             {isFavorite ? <FaHeart size={24} color="red" /> : <FaRegHeart size={24} color="red" />}
           </button>
+
         </div>
         <img src={recipe.image_url} alt={recipe.name} className="recipe-image" />
         <div className="recipe-meta">
