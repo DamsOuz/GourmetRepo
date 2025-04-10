@@ -4,28 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { fetchRecipe, fetchRelatedRecipes, fetchFavorites, addFavorite, removeFavorite } from '../api/API';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import Spinner from '../components/Spinner';
 import "./Recipe.css";
-
-// Fonction utilitaire pour formater les instructions
-function formatInstructions(instr) {
-  if (!instr) return [<p key="empty">Aucune instruction disponible.</p>];
-
-  // Supprime les balises <script> ... </script>
-  const safe = instr.replace(/<script.*?>.*?<\/script>/gis, '');
-
-  // Sépare sur \n et filtre les lignes vides
-  const lines = safe.split(/\r?\n/).filter(line => line.trim() !== '');
-
-  // Convertit '- ' en <li>, sinon <p>
-  return lines.map((line, idx) => {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('- ')) {
-      return <li key={idx}>{trimmed.slice(2)}</li>;
-    }
-    return <p key={idx}>{line}</p>;
-  });
-}
 
 function Recipe() {
   const { id } = useParams();
@@ -36,7 +15,7 @@ function Recipe() {
   const [error, setError] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Chargement de la recette principale
+  // Charger la recette
   useEffect(() => {
     fetchRecipe(id)
       .then((data) => setRecipe(data))
@@ -46,7 +25,7 @@ function Recipe() {
       });
   }, [id]);
 
-  // Chargement des recettes liées
+  // Charger les recettes liées
   useEffect(() => {
     fetchRelatedRecipes(id)
       .then((data) => setRelated(data))
@@ -55,12 +34,15 @@ function Recipe() {
       });
   }, [id]);
 
-  // Vérifier l'état du favori
+  // Vérifier si la recette est déjà dans les favoris
   useEffect(() => {
     if (token && user) {
       fetchFavorites(token)
         .then((data) => {
-          const favorited = data.some(fav => fav.recipe && fav.recipe.id.toString() === id.toString());
+          // On suppose que data est un tableau d'objets contenant chacun un champ "recipe" et "recipe.id"
+          const favorited = data.some(
+            (fav) => fav.recipe && fav.recipe.id.toString() === id.toString()
+          );
           setIsFavorite(favorited);
         })
         .catch((err) => {
@@ -69,7 +51,6 @@ function Recipe() {
     }
   }, [token, user, id]);
 
-  // Fonction switch pour favoris
   const toggleFavorite = async () => {
     if (!token || !user) {
       toast.warn("Vous devez être connecté pour gérer vos favoris.");
@@ -92,27 +73,24 @@ function Recipe() {
   };
 
   if (error) {
-    return <div className="error" style={{ color: 'red' }}>{error}</div>;
+    return <div className="error" style={{ color: "red" }}>{error}</div>;
   }
-
   if (!recipe) {
-    return <Spinner />;
+    return <div>Chargement...</div>;
   }
 
   return (
     <div className="recipe-container">
       <div className="recipe-main">
-        <div className="recipe-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="recipe-header">
           <h1>{recipe.name}</h1>
           <button
             onClick={toggleFavorite}
             className="favorite-btn"
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-            aria-label={isFavorite ? 'Retirer de vos favoris' : 'Ajouter aux favoris'}
+            aria-label={isFavorite ? "Retirer de vos favoris" : "Ajouter aux favoris"}
           >
             {isFavorite ? <FaHeart size={24} color="red" /> : <FaRegHeart size={24} color="red" />}
           </button>
-
         </div>
         <img src={recipe.image_url} alt={recipe.name} className="recipe-image" />
         <div className="recipe-meta">
@@ -124,23 +102,21 @@ function Recipe() {
           <p><strong>Description :</strong> {recipe.description ?? "N/A"}</p>
           <p><strong>Date de Création :</strong> {recipe.created_at ?? "N/A"}</p>
         </div>
-        <div className="recipe-description">
-          <h2>Instructions</h2>
-          <div className="instructions-content">
-            {formatInstructions(recipe.instructions)}
-          </div>
-        </div>
       </div>
       <div className="recipe-sidebar">
         <h3>Recettes liées</h3>
-        {related.map((rel) => (
-          <div key={rel.id} className="related-recipe">
-            <a href={`/recettes/${rel.id}`}>
-              <img src={rel.image_url} alt={rel.name} className="related-recipe-image" />
-              <p>{rel.name}</p>
-            </a>
-          </div>
-        ))}
+        {related.length === 0 ? (
+          <p>Aucune recette liée.</p>
+        ) : (
+          related.map((rel) => (
+            <div key={rel.id} className="related-recipe">
+              <a href={`/recettes/${rel.id}`}>
+                <img src={rel.image_url} alt={rel.name} className="related-recipe-image" />
+                <p>{rel.name}</p>
+              </a>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
