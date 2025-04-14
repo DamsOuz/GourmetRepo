@@ -6,17 +6,14 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Au montage, on relit le token et l'utilisateur depuis le sessionStorage
   useEffect(() => {
     const storedToken = sessionStorage.getItem("token");
     const storedUser = sessionStorage.getItem("user");
 
-    // Vérifie que storedToken n'est pas "undefined" avant de l'utiliser
     if (storedToken && storedToken !== "undefined") {
       setToken(storedToken);
     }
 
-    // Vérifie que storedUser n'est pas "undefined" avant de faire JSON.parse
     if (storedUser && storedUser !== "undefined") {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -27,8 +24,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // La fonction login reçoit un token sans bearer
-  // et un objet userData, puis les stocke
+  // Stocke l'utilisateur et le token
   const login = (newToken, userData) => {
     setToken(newToken);
     setUser(userData);
@@ -37,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("user", userData ? JSON.stringify(userData) : "");
   };
 
-  // logout efface tout
+  // Réinitialise l'état et vide le sessionStorage
   const logout = () => {
     setToken(null);
     setUser(null);

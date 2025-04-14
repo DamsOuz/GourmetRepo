@@ -3,14 +3,14 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { fetchFavorites, removeFavorite } from '../api/API';
-import "./Favorites.css"; // On crée un fichier dédié pour les styles de la page des favoris
+import "./Favorites.css";
 
 function Favorites() {
   const { token, user } = useContext(AuthContext);
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fonction pour actualiser la liste des favoris
+  // Recharge les favoris depuis l'API
   const loadFavorites = async () => {
     if (!token || !user) {
       setError("Vous devez être connecté pour voir vos favoris.");
@@ -30,6 +30,7 @@ function Favorites() {
     loadFavorites();
   }, [token, user]);
 
+  // Supprime un favori puis recharge la liste
   const handleRemoveFavorite = async (recipeID) => {
     if (!token || !user) {
       toast.warn("Vous devez être connecté pour retirer un favori.");
