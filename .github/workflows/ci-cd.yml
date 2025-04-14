@@ -24,19 +24,23 @@ jobs:
       # Installation des dépendances
       - name: Install dependencies
         run: npm install
+        working-directory: gourmet-recipes-app
 
       # Lancer les tests
       - name: Run tests
         run: npm test
+        working-directory: gourmet-recipes-app
 
       # Construire l'application
       - name: Build application
         run: npm run build
+        working-directory: gourmet-recipes-app
 
       # Construire l'image Docker
       - name: Build Docker image
         run: |
           docker build --no-cache --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}:latest .
+        working-directory: gourmet-recipes-app
 
       # Se connecter à Docker Hub
       - name: Log in to Docker Hub
