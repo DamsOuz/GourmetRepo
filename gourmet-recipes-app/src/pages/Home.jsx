@@ -9,6 +9,7 @@ function Home() {
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [error, setError] = useState(null);
 
+  // Charge les recettes au montage
   useEffect(() => {
     fetchRecipes()
       .then((data) => {
@@ -21,6 +22,7 @@ function Home() {
       });
   }, []);
 
+  // Filtre les recettes selon la requête de recherche
   const handleSearch = (query) => {
     if (!query) {
       setFilteredRecipes(recipes);

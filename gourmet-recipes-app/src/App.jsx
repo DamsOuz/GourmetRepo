@@ -6,9 +6,8 @@ import Login from './pages/Login';
 import Favorites from './pages/Favorites';
 import Header from './components/Header';
 import { AuthProvider } from './context/AuthContext';
-import './App.css';
-
 import { ToastContainer } from 'react-toastify';
+import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 const App = () => {
   return (

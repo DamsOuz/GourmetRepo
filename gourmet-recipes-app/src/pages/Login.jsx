@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser, fetchUser } from '../api/API';
-import './Login.css'; // Import du fichier de style
+import './Login.css';
 
 function Login() {
   const [pseudonym, setPseudonym] = useState('');
@@ -13,6 +13,7 @@ function Login() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Envoie les identifiants, récupère les infos utilisateur et connecte
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback('');

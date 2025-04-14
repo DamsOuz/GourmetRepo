@@ -4,16 +4,16 @@ const API_BASE_URL = 'https://gourmet.cours.quimerch.com';
  * Authentifie l'utilisateur et récupère le token.
  * @param {string} username 
  * @param {string} password 
- * @returns {Promise<Object>} Retourne un objet contenant le token.
+ * @returns {Promise<Object>} Un objet contenant le token.
  */
 export async function loginUser(username, password) {
     const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
     });
 
     if (!response.ok) {
@@ -21,8 +21,7 @@ export async function loginUser(username, password) {
         throw new Error(`Erreur HTTP ${response.status} : ${errorText}`);
     }
 
-    const data = await response.json();
-    return data; // On attend que data contienne { token: "..." }
+    return response.json();
 }
 
 /**
@@ -36,8 +35,8 @@ export async function fetchUser(username, token) {
         method: 'GET',
         headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
 
     if (!response.ok) {
@@ -50,17 +49,16 @@ export async function fetchUser(username, token) {
 
 /**
  * Récupère la liste des recettes depuis l'API.
- *
- * @returns {Promise<Array>} Un tableau contenant les recettes.
- * @throws {Error} Si l'appel échoue ou si la réponse n'est pas un JSON valide.
+ * @returns {Promise<Array>} Tableau de recettes.
+ * @throws {Error} Si l'appel échoue ou si la réponse n'est pas du JSON valide.
  */
 export async function fetchRecipes() {
     const response = await fetch(`${API_BASE_URL}/recipes`, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     });
 
     if (!response.ok) {
@@ -68,65 +66,61 @@ export async function fetchRecipes() {
         throw new Error(`Erreur HTTP ${response.status} : ${errorText}`);
     }
 
-    // Récupère la réponse brute sous forme de texte
     const rawData = await response.text();
 
     try {
-        // Essaie de parser le JSON et renvoie les données
-        const data = JSON.parse(rawData);
-        return data;
-    } catch (error) {
+        return JSON.parse(rawData);
+    } catch {
         throw new Error("Le serveur n’a pas renvoyé de JSON valide.");
     }
 }
 
-
 /**
  * Récupère les détails d'une recette.
- *
- * @param {string} id - L'ID de la recette.
- * @returns {Promise<Object>} - L'objet recette.
- * @throws {Error} - Si la requête échoue ou si le JSON n'est pas valide.
+ * @param {string} id - ID de la recette.
+ * @returns {Promise<Object>} Objet recette.
  */
 export async function fetchRecipe(id) {
     const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     });
+
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Erreur HTTP ${response.status} : ${errorText}`);
     }
+
     const raw = await response.text();
+
     try {
         return JSON.parse(raw);
-    } catch (error) {
+    } catch {
         throw new Error("Le serveur n’a pas renvoyé de JSON valide pour la recette.");
     }
 }
 
 /**
  * Récupère les recettes liées à une recette donnée.
- *
- * @param {string} id - L'ID de la recette principale.
- * @returns {Promise<Array>} - Un tableau des recettes liées (ou un tableau vide si l'API échoue à les fournir).
+ * @param {string} id - ID de la recette principale.
+ * @returns {Promise<Array>} Tableau des recettes liées, ou vide si erreur.
  */
 export async function fetchRelatedRecipes(id) {
     const response = await fetch(`${API_BASE_URL}/recipes/${id}/related`, {
         method: 'GET',
         headers: {
             Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            'X-Requested-With': 'XMLHttpRequest',
+        },
     });
 
-    // Si la réponse n'est pas OK, on retourne un tableau vide (pas critique)
     if (!response.ok) return [];
 
     const raw = await response.text();
+
     try {
         return JSON.parse(raw);
     } catch {
@@ -137,35 +131,36 @@ export async function fetchRelatedRecipes(id) {
 
 /**
  * Ajoute une recette aux favoris de l'utilisateur.
- *
- * @param {string} username - Le pseudonyme de l'utilisateur.
- * @param {string} token - Le token d'authentification.
- * @param {string|number} recipeID - L'ID de la recette à ajouter aux favoris.
- * @returns {Promise<string>} - La réponse du serveur (par exemple "1" pour confirmer la suppression, ou un message de succès).
- * @throws {Error} - En cas d'erreur lors de l'ajout aux favoris.
+ * @param {string} username 
+ * @param {string} token 
+ * @param {string|number} recipeID 
+ * @returns {Promise<string>} Réponse du serveur.
  */
 export async function addFavorite(username, token, recipeID) {
     const url = `${API_BASE_URL}/users/${username}/favorites?recipeID=${recipeID}`;
+
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
+
     const txt = await response.text();
+
     if (!response.ok) {
         throw new Error(`Impossible d’ajouter la recette aux favoris : ${txt}`);
     }
+
     return txt;
 }
 
 /**
  * Récupère la liste des favoris.
- *
- * @param {string} token - Le token d'authentification.
- * @returns {Promise<Array>} - La liste des favoris.
+ * @param {string} token 
+ * @returns {Promise<Array>} Liste des favoris.
  */
 export async function fetchFavorites(token) {
     const response = await fetch(`${API_BASE_URL}/favorites`, {
@@ -173,8 +168,8 @@ export async function fetchFavorites(token) {
         headers: {
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
 
     if (!response.ok) {
@@ -182,21 +177,17 @@ export async function fetchFavorites(token) {
         throw new Error(`Erreur HTTP ${response.status} : ${errorText}`);
     }
 
-    // Retourne directement l'objet JSON (typiquement, un tableau)
-    const data = await response.json();
-    return data;
+    return response.json();
 }
 
 /**
- * Supprime un favori pour l'utilisateur spécifié.
- *
- * @param {string} username - Le pseudonyme de l'utilisateur.
- * @param {string} token - Le token d'authentification.
- * @param {number|string} recipeID - L'ID de la recette à supprimer des favoris.
- * @returns {Promise<string>} - La réponse du serveur indiquant le résultat de la suppression.
+ * Supprime une recette des favoris de l'utilisateur.
+ * @param {string} username 
+ * @param {string} token 
+ * @param {number|string} recipeID 
+ * @returns {Promise<string>} Réponse du serveur.
  */
 export async function removeFavorite(username, token, recipeID) {
-    // Construction de l'URL avec le username et le query parameter recipeID
     const url = `${API_BASE_URL}/users/${username}/favorites?recipeID=${recipeID}`;
 
     const response = await fetch(url, {
@@ -204,8 +195,8 @@ export async function removeFavorite(username, token, recipeID) {
         headers: {
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
 
     const txt = await response.text();
@@ -216,4 +207,3 @@ export async function removeFavorite(username, token, recipeID) {
 
     return txt;
 }
-
